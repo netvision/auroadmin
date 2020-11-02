@@ -1,0 +1,15 @@
+type Author @model {
+  id: ID!
+  name: String!
+  signature: String
+  posts: [Post] @connection(keyName: "byAuthor", fields: ["id"])
+}
+
+type Post @model @searchable @key(name: "byAuthor", fields: ["authorID"]) {
+  id: ID!
+  content: String!
+  authorID: ID!
+  author: Author @connection(fields: ["authorID"])
+  ref: String,
+  createdAt: AWSDateTime
+}

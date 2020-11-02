@@ -1,0 +1,26 @@
+{
+    "sriauro": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-auroadmin-sriauro-181450-authRole",
+            "UnauthRoleArn": "arn:aws:iam::744751167241:role/amplify-auroadmin-sriauro-181450-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::744751167241:role/amplify-auroadmin-sriauro-181450-authRole",
+            "Region": "ap-south-1",
+            "DeploymentBucketName": "amplify-auroadmin-sriauro-181450-deployment",
+            "UnauthRoleName": "amplify-auroadmin-sriauro-181450-unauthRole",
+            "StackName": "amplify-auroadmin-sriauro-181450",
+            "StackId": "arn:aws:cloudformation:ap-south-1:744751167241:stack/amplify-auroadmin-sriauro-181450/370a6270-8629-11ea-ac2d-06184e58d994",
+            "AmplifyAppId": "d1aayy1inpwyk7"
+        },
+        "categories": {
+            "auth": {
+                "auroadmin27557739": {}
+            },
+            "hosting": {
+                "amplifyhosting": {
+                    "appId": "d1aayy1inpwyk7",
+                    "type": "manual"
+                }
+            }
+        }
+    }
+}
