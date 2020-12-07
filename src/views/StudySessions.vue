@@ -43,14 +43,13 @@ export default {
         baseUrl:String,
         s3 : new AWS.S3({
             region: 'ap-south-1',
-            accessKeyId: 'AKIA22ZVA64EUIBJ67FV',
-            secretAccessKey: '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'
+            accessKeyId: process.env.VUE_APP_AWS_ACCESS_ID,
+            secretAccessKey: process.env.VUE_APP_AWS_ACCESS_KEY
             })
     }),
     async mounted(){
         this.folders = await this.getRootFolders()
         this.rootInfo = await this.getRootInfo()
-        console.log(this.rootInfo)
     },
 
     methods: {

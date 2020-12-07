@@ -46,8 +46,9 @@ export default {
     data: () => ({
         s3 : new AWS.S3({
             region: 'ap-south-1',
-            accessKeyId: 'AKIA22ZVA64EUIBJ67FV',
-            secretAccessKey: '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'
+            region: 'ap-south-1',
+            accessKeyId: process.env.VUE_APP_AWS_ACCESS_ID,
+            secretAccessKey: process.env.VUE_APP_AWS_ACCESS_KEY
             }),
         cls:{},
         classInfo:[],
@@ -84,7 +85,7 @@ export default {
                 Delimiter: '/'
             };
             let data = await this.s3.listObjectsV2(params).promise()
-            console.log(data);
+            //console.log(data);
             return data.CommonPrefixes.map(fol =>({
                 key: fol.Prefix,
                 title: fol.Prefix.split('/')[fol.Prefix.split('/').length - 2]
@@ -175,7 +176,7 @@ export default {
             this.files = await this.getFiles(fol.key)
             this.folders = await this.getFolders(fol.key)
             this.classInfo = await this.getClassInfo(fol.key)
-            console.log(this.classInfo)
+            //console.log(this.classInfo)
         },
 
         updateInfo(e){
@@ -199,41 +200,6 @@ export default {
             
         }
         
-
-        /*
-        setTrack: function(){
-            console.log(this.track)
-            this.audioSrc = this.baseUrl+this.cls.key+'audio/'+this.track
-            this.textFileName = this.track.slice(0, this.track.lastIndexOf('.')) + '.txt';
-            this.textKey = this.baseUrl+this.cls.key+'text/'+this.textFileName
-            this.getText(this.textKey)
-            
-        },
-
-        saveText: function(){
-            //console.log(this.content)
-            Storage.put(this.cls.key+'text/'+this.textFileName, Buffer.from(this.content),  {
-                level: 'public',
-                contentType: 'text/html'
-            }).then(res=>{
-                alert('Text Update!')
-            }).catch(err => {
-                alert('Some Error Occured!' + err)
-            })
-        },
-
-        getText: function(key){
-            this.content = ''
-            axios.get(key, { headers: { 'Cache-Control': 'no-cache' }}).then(res =>{
-                this.content = res.data
-                //console.log(this.content)
-            }).catch(err =>{
-                console.log(err);
-                this.content = "Please enter text!"
-            })
-        }
-
-        */
     }
     
 }

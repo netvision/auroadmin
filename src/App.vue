@@ -82,7 +82,7 @@ export default {
     });
 
     Auth.currentAuthenticatedUser().then(user => {
-        console.log(user)
+        //console.log(user)
         this.signedIn = true
       }).catch(() => this.signedIn = false)
   },

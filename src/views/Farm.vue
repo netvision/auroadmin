@@ -44,7 +44,8 @@
     },
     data: () => ({
      tab: null,
-    })
+    }),
+    
   };
 </script>
 

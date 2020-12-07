@@ -40,7 +40,7 @@ export default {
             },
             tooltip: {
                 formatter: function (params, ticket, callback) {
-                return params.name+': '+params.data+'Kg';
+                return params.seriesName+'<br />'+params.name+': '+params.data+'Kg';
                 }
             },
             xAxis: {
@@ -52,7 +52,17 @@ export default {
                 nameGap:10
             },
             series: [{
-                name: 'monthly',
+                name: 'LakshmiNath ji',
+                type: 'bar',
+                data: []
+            },
+            {
+                name: 'Makhkhanlalji',
+                type: 'bar',
+                data: []
+            },
+            {
+                name: 'Bissau',
                 type: 'bar',
                 data: []
             }]
@@ -70,7 +80,17 @@ export default {
                 name: "In Kg",
                 nameGap:10},
             series: [{
-                name: 'daily',
+                name: 'lakshminathji',
+                type: 'bar',
+                data: []
+            },
+            {
+                name: 'makhkhanlalji',
+                type: 'bar',
+                data: []
+            },
+            {
+                name: 'Bissau',
                 type: 'bar',
                 data: []
             }]
@@ -80,17 +100,24 @@ export default {
         async getFarmData() {
             const that = this;
             let record = await axios.get('https://api.resurgentindia.org/farms/summary', {params: {month:this.month, year: this.year}});
+            let record1 = await axios.get('https://api.resurgentindia.org/farms/summary', {params: {month:this.month, year: this.year, farm_id:2}});
+            let record2 = await axios.get('https://api.resurgentindia.org/farms/summary', {params: {month:this.month, year: this.year, farm_id:3}});
             that.loading = false;
             that.loading1 = false;
             that.bar.series[0].data = record.data.monthly;
             that.daily.series[0].data = record.data.daily;
+            that.bar.series[1].data = record1.data.monthly;
+            that.daily.series[1].data = record1.data.daily;
+            that.bar.series[2].data = record2.data.monthly;
+            that.daily.series[2].data = record2.data.daily;
             that.daily.title.text = "Daily Data for the "+that.months[that.month - 1].name+" of "+that.year;
             that.bar.title.text = "Monthly data for "+that.year;
             that.daily.tooltip.triggerOn = 'click';
             that.daily.tooltip.formatter = function(params, ticket, callback){
                 let day = params.dataIndex + 1;
-                //console.log(params)
-                axios.get('https://api.resurgentindia.org/farms/daily?record_date='+that.year+'-'+that.month+'-'+day).then(res =>{ 
+                let farm = params.seriesIndex + 1;
+                console.log(params)
+                axios.get('https://api.resurgentindia.org/farms/daily?farm_id='+farm+'&record_date='+that.year+'-'+that.month+'-'+day).then(res =>{ 
                     callback(ticket, that.dataFormat(res.data, params))
                 });
                 return "Loading data..."
@@ -101,7 +128,7 @@ export default {
           let day = parseInt(p.dataIndex) + 1
           let mnt = this.months.filter(m => m.id == this.month)
           let string = '<table>'
-          string += '<tr><th colspan="2">'+mnt[0].name+' '+day+', '+this.year+'</th></tr>'
+          string += '<tr><th colspan="2">'+p.seriesName+'<br />'+mnt[0].name+' '+day+', '+this.year+'</th></tr>'
           d.forEach(r =>{
               string += '<tr><td>'+r.name+'</td><td style="text-align:right; padding-left:10px">'+r.qty+'Kg</td></tr>'
           })
