@@ -10,14 +10,14 @@
             <v-col>
                 <v-btn @click="getFarmData">Get Data</v-btn>
             </v-col>
-            </v-row>
-            <div style="height:400px; width:90%">
-                <IEcharts :option="daily" :loading="loading1" />
-            </div>
-            <div style="height:400px; width:90%">
-              <IEcharts :option="bar" :loading="loading" @ready="onReady" @click="onClick" />
-            </div>
-          </v-card>
+        </v-row>
+        <div style="height:400px; width:90%">
+            <IEcharts :option="daily" :loading="loading1" />
+        </div>
+        <div style="height:400px; width:90%">
+            <IEcharts :option="bar" :loading="loading" @ready="onReady" @click="onClick" />
+        </div>
+    </v-card>
 </template>
 
 <script>
@@ -141,6 +141,10 @@ export default {
       onClick(event, instance, ECharts) {
         //console.log(instance);
       },
+    },
+
+    mounted(){
+        this.getFarmData()
     }
 }
 </script>

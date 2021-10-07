@@ -1,67 +1,85 @@
 <template>
   <v-container>
-       
-        <v-card id="inputForm">
-            <v-card-title>Add New Record</v-card-title>
-              <v-row>
-                <v-col cols="6" sm="3" md="2">
-                  <v-menu v-model="menu2" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
-                    <template v-slot:activator="{ on }">
-                      <v-text-field v-model="item.date" label="Date" prepend-icon="event" readonly v-on="on"></v-text-field>
-                    </template>
-                    <v-date-picker v-model="item.date" @input="menu2 = false"></v-date-picker>
-                  </v-menu>
-                </v-col>
-                <v-col cols="6" sm="3" md="2">
-                  <model-list-select :list="produceList" v-model="item.produce" option-value="id" option-text="name" placeholder="select produce" @input="printProduce(item)"></model-list-select>
-                </v-col>
-                <v-col cols="6" sm="3" md="2">
-                  <v-text-field v-model="item.quantity" label="Quantity" suffix="Kg"></v-text-field>
-                </v-col>
-                <v-col cols="6" sm="3" md="2">
-                  <v-select v-model='item.source' :items="farmHouses" item-text="name" item-value="id" label="Select Source"></v-select>
-                </v-col>
-                <v-col cols="6" sm="3" md="2">
-                  <v-text-field v-model="item.destination" label="Destination"></v-text-field>
-                </v-col>
-                <v-col cols="6" sm="3" md="2">
-                  <v-text-field v-model="item.remark" label="Remark, if any"></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col><v-btn @click="addRecord" text>Add Record</v-btn></v-col>
-              </v-row>
-            <modal name="addProduce">
-                <v-container>
-                <h3>Add New Item</h3>
-                <v-row>
-                  <v-col><v-text-field v-model="newItem.name" label="Name"></v-text-field></v-col>
-                  <v-col><v-select v-model='newItem.category' :items="categories" label="Category"></v-select></v-col>
-                  <v-col><v-select v-model='newItem.type' :items="types" label="Type"></v-select></v-col>
-                </v-row>
-                <v-row>
-                  <v-col><v-text-field v-model="newItem.other_info" label="Other Info"></v-text-field></v-col>
-                </v-row>
-                <v-btn @click="addNewItem" text>Save and select</v-btn>
-                </v-container>
-            </modal>
-           
-        </v-card>
+      
       <v-card>
-        <v-card-title>last 10 Records</v-card-title>
-        <v-simple-table>
-          <template v-slot:default>
-            <thead>
-              <tr><th class="text-left">Date</th><th class="text-left">Item</th><th>Quantity</th><th>Source</th><th>Destination</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-          <tr v-for="record of todaysRecords" :key="record.id">
-            <td>{{record.record_date}}</td><td>{{record.produce.name}}</td><td>{{record.quantity}} Kg</td><td>{{record.farmHouse.name}}</td><td>{{record.destination}}</td><td><v-btn icon color="red" @click="deleteRecord(record)"><v-icon>mdi-delete</v-icon></v-btn></td>
-          </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
-      </v-card>
+        
+      <v-data-table :headers="headers" :items="todaysRecords" class="elevation-1">
+      <template v-slot:top>
+      <v-toolbar flat>
+        <v-toolbar-title><v-btn @click="lastRecords" text>Last 10 Records</v-btn> | 
+          <v-menu ref="menu1" v-model="menu1" :close-on-content-click="false" transition="scale-transition" offset-y max-width="290px" min-width="290px">
+            <template v-slot:activator="{ on }">
+              <v-btn text v-on="on">Show Records of {{date}}</v-btn>
+            </template>
+            <v-date-picker v-model="date" no-title @input="getData"></v-date-picker>
+          </v-menu></v-toolbar-title>
+        
+        <v-spacer></v-spacer>
+        <v-dialog v-model="dialog" max-width="500px">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on"> New Entry </v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ formTitle }}</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-menu v-model="menu2" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
+                    <template v-slot:activator="{ on }">
+                      <v-text-field v-model="editedItem.record_date" label="Date" prepend-icon="event" readonly v-on="on"></v-text-field>
+                    </template>
+                    <v-date-picker v-model="editedItem.record_date" @input="menu2 = false"></v-date-picker>
+                    </v-menu>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <model-list-select :list="produceList" v-model="editedItem.produce" option-value="id" option-text="name" placeholder="select produce"></model-list-select>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.quantity" label="Qty (Kg)"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <model-list-select :list="farmHouses" v-model="editedItem.farmHouse" option-value="id" option-text="name" placeholder="select source"></model-list-select>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.destination" label="Destination"></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+              <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="headline">Are you sure you want to delete this item?</v-card-title>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
+              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-toolbar>
+    </template>
+    <template v-slot:item.actions="{ item }">
+      <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+      <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+    </template>
+    <template v-slot:no-data>
+      <v-btn color="primary" @click="initialize">Reset</v-btn>
+    </template>
+  </v-data-table>
+  </v-card>
   </v-container>
 </template>
 
@@ -80,55 +98,65 @@ export default {
             produce:{},
             date: new Date().toISOString().substr(0, 10),
         },
-        categories:['Vegitable', 'Fruit', 'Grain', 'Flowers'],
-        types:['Winter', 'Summer'],
         farmHouses:[],
         newItem:{},
         menu2: false,
+        menu1: false,
+        date: new Date().toISOString().substr(0, 10),
+
+        dialog: false,
+        dialogDelete: false,
+        headers: [
+          {
+            text: 'Date',
+            align: 'start',
+            sortable: false,
+            value: 'record_date',
+          },
+          { text: 'Item', value: 'produce.name' },
+          { text: 'Quantity (Kg)', value: 'quantity' },
+          { text: 'Source', value: 'farmHouse.name' },
+          { text: 'Destination', value: 'destination' },
+          { text: 'Actions', value: 'actions', sortable: false },
+        ],
+        editedIndex: -1,
+        editedItem: {
+          date: '',
+          produce: {},
+          quantity: 0,
+          farmHouse: {},
+          destination: '',
+          remark: ''
+        },
+        defaultItem: {
+          date: '',
+          produce: {},
+          quantity: 0,
+          farmHouse: {},
+          destination: '',
+          remark: ''
+        },
     }),
+    computed: {
+      formTitle () {
+        return this.editedIndex === -1 ? 'New Entry' : 'Edit Record'
+      },
+    },
+
+    watch: {
+      dialog (val) {
+        val || this.close()
+      },
+      dialogDelete (val) {
+        val || this.closeDelete()
+      },
+    },
+
     mounted(){
-        axios.get('https://api.resurgentindia.org/farms/products').then(res =>{
-          this.produceList = res.data
-          this.produceList.unshift({id:0, name:'Add New'})
-        })
-        axios.get('https://api.resurgentindia.org/farm-houses').then(res =>{
-          this.farmHouses = res.data
-        })
-        axios.get('https://api.resurgentindia.org/farms?expand=farmHouse,produce&sort=-id&per-page=10').then(res=>{
-          this.todaysRecords = res.data.data
-        })
+       this.initialize()
     },
     methods:{
-        addItem(){
-            this.items.push({
-            produce:{}
-            })
-        },
-
-        showModal(){
-          console.log(this.item)
-          this.$modal.show('addProduce')
-        },
-
-        printProduce(item){
-          if(item.produce.id == 0){
-            this.$modal.show('addProduce')
-          }
-        //console.log(this.items)
-        },
-
-        addNewItem(){
-          axios.post('https://api.resurgentindia.org/farm-produces', this.newItem).then(res =>{
-            if(res.status == '201'){
-              this.produceList.push(res.data);
-              this.item.produce = res.data;
-            }
-            else alert('could not add the new item!')
-          });
-          this.$modal.hide('addProduce')
-        },
-
-        addRecord(){
+         addRecord(){
           let record = {
             record_date:this.item.date,
             produce_id: this.item.produce.id,
@@ -158,7 +186,98 @@ export default {
             })
           }
          
+        },
+
+        getData(){
+          axios.get('https://api.resurgentindia.org/farms?expand=farmHouse,produce&sort=-id&record_date='+this.date).then(res=>{
+            this.todaysRecords = res.data.data
+          })
+          this.menu1= false
+        },
+        lastRecords(){
+          axios.get('https://api.resurgentindia.org/farms?expand=farmHouse,produce&sort=-id&per-page=10').then(res=>{
+            this.todaysRecords = res.data.data
+          })
+          this.date = new Date().toISOString().substr(0, 10)
+        },
+
+
+        //
+        initialize () {
+          axios.get('https://api.resurgentindia.org/farms/products').then(res =>{
+            this.produceList = res.data
+          })
+          axios.get('https://api.resurgentindia.org/farm-houses').then(res =>{
+            this.farmHouses = res.data
+          })
+          axios.get('https://api.resurgentindia.org/farms?expand=farmHouse,produce&sort=-id&per-page=10').then(res=>{
+            this.todaysRecords = res.data.data
+          })
+          this.date = new Date().toISOString().substr(0, 10)
+          
+      },
+
+      editItem (item) {
+        console.log(item)
+        this.editedIndex = this.todaysRecords.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+      },
+
+      deleteItem (item) {
+        this.editedIndex = this.todaysRecords.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogDelete = true
+      },
+
+      deleteItemConfirm () {
+        axios.delete('https://api.resurgentindia.org/farms/'+this.editedItem.id).then(res=>{
+              if(res.status == '204'){
+                this.initialize()
+              }
+              else alert('Couldnt delete the record!!')
+            })
+        this.closeDelete()
+      },
+
+      close () {
+        this.dialog = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+
+      closeDelete () {
+        this.dialogDelete = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+
+      save () {
+        let record = {
+            record_date:this.editedItem.record_date,
+            produce_id: this.editedItem.produce.id,
+            quantity: this.editedItem.quantity,
+            qty_unit: 'Kg',
+            farm_house_id: this.editedItem.farmHouse.id,
+            destination: this.editedItem.destination,
+            remark:(this.editedItem.remark) ? this.editedItem.remark : ' '
+          };
+        console.log(this.editedItem)
+        if (this.editedIndex > -1) {
+          axios.put('https://api.resurgentindia.org/farms/'+this.editedItem.id, record).then(res=>{
+            this.initialize()
+          })
+        } else {
+          axios.post('https://api.resurgentindia.org/farms', record).then(res=>{
+            this.initialize()
+          })
         }
+        this.close()
+      },
         
       }
 }
@@ -170,6 +289,11 @@ export default {
   border-bottom: 1px solid #333;
   border-radius:0%;
   margin-top: 0.9em;
+}
+
+#inputForm{
+  border: 2px solid #333;
+  margin-bottom: 10px;
 }
 
 </style>

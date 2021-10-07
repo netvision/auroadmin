@@ -20,6 +20,18 @@ Vue.use(AmplifyPlugin, AmplifyModules)
 Vue.use(VModal)
 Vue.config.productionTip = false
 
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return new Date(value).toLocaleDateString(
+      'en-gb',
+      {
+        year: 'numeric',
+        month: 'long'
+      }
+    )
+  }
+});
+
 new Vue({
   render: h => h(App),
   router,
